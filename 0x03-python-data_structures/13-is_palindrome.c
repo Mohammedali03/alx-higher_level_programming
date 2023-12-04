@@ -1,45 +1,71 @@
 #include "lists.h"
 
 /**
- * is_palindrome - checks if a singly linked list
- * is a palindrome
- * @head: pointer to head of list
- * Return: 0 if it is not a palindrome,
- * 1 if it is a palndrome
+ * reverse_listint - reverses a linked list
+ * @head: pointer to the first node in the list
+ * Return: pointer to the first node in the new list
  */
+void reverse_listint(listint_t **head)
+{
+	listint_t *prev = NULL;
+	listint_t *current = *head;
+	listint_t *next = NULL;
 
+	while (current)
+	{
+		next = current->next;
+		current->next = prev;
+		prev = current;
+		current = next;
+	}
+
+	*head = prev;
+}
+
+/**
+ * is_palindrome - checks if a linked list is a palindrome
+ * @head: double pointer to the linked list
+ *
+ * Return: 1 if it is, 0 if not
+ */
 int is_palindrome(listint_t **head)
 {
-	listint_t *tortoise = *head, *hare = *head, *stack_top = NULL;
-	listint_t *temp, *new_node;
+	listint_t *slow = *head, *fast = *head, *temp = *head, *dup = NULL;
 
-	/* Traverse the linked list and push elements onto the stack */
-	while (hare != NULL && hare->next != NULL)
+	if (*head == NULL || (*head)->next == NULL)
+		return (1);
+
+	while (1)
 	{
-		/* Push the value onto the stack */
-		new_node = malloc(sizeof(listint_t));
-		if (new_node == NULL)
-			return (0);
-		new_node->n = tortoise->n;
-		new_node->next = stack_top;
-		stack_top = new_node;
-		tortoise = tortoise->next;
-		hare = hare->next->next;
+		fast = fast->next->next;
+		if (!fast)
+		{
+			dup = slow->next;
+			break;
+		}
+		if (!fast->next)
+		{
+			dup = slow->next->next;
+			break;
+		}
+		slow = slow->next;
 	}
-	/* If the length of the linked list is odd, skip the middle element */
-	if (hare != NULL)
-		tortoise = tortoise->next;
-	/* Traverse the remaining linked list and compare with the*/
-	/* elements popped from the stack */
-	while (tortoise != NULL)
+
+	reverse_listint(&dup);
+
+	while (dup && temp)
 	{
-		/* Pop the value from the stack */
-		if (stack_top == NULL || stack_top->n != tortoise->n)
+		if (temp->n == dup->n)
+		{
+			dup = dup->next;
+			temp = temp->next;
+		}
+		else
 			return (0);
-		temp = stack_top;
-		stack_top = stack_top->next;
-		free(temp);
-		tortoise = tortoise->next;
 	}
-	return (1);
+
+	if (!dup)
+		return (1);
+
+	return (0);
 }
